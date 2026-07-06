@@ -1,0 +1,26 @@
+{
+  "name": "humanizer",
+  "owner": {
+    "name": "Chad Furman",
+    "url": "https://github.com/chadfurman"
+  },
+  "metadata": {
+    "description": "The humanizer plugin — score prose for AI tells and rewrite them out.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "humanizer",
+      "source": "./",
+      "description": "Score how much writing reads like AI and help rewrite the tells out. Adds a `humanizer` skill Claude can run against files, drafts, or pasted text.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Chad Furman",
+        "url": "https://github.com/chadfurman"
+      },
+      "homepage": "https://github.com/chadfurman/humanizer",
+      "license": "MIT",
+      "keywords": ["ai-detection", "writing", "tone", "prose", "editing"]
+    }
+  ]
+}

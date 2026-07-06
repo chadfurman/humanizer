@@ -13,6 +13,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
+    "humanize": "tsx src/cli.ts",
     "score": "tsx src/cli.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

@@ -8,13 +8,33 @@ signal.
 Built for **self-editing your own drafts**, not for accusing anyone else's — see
 [the caveat](#detectors-are-advisory) below.
 
+## Use it in Claude Code
+
+This repo is also a Claude Code plugin marketplace. Add it and install the plugin:
+
+```
+/plugin marketplace add chadfurman/humanizer
+/plugin install humanizer@humanizer
+```
+
+That gives Claude a `humanizer` skill — ask it to "check this draft for AI tells" or
+"score these posts and rank them," and it runs the scorer against your files and
+offers to rewrite what fires. No install step; it runs on Node ≥ 22.6's native
+TypeScript support.
+
 ## Quick start
 
 ```bash
 npm install
-npx tsx src/cli.ts draft.md          # score a file
-cat draft.txt | npx tsx src/cli.ts   # score stdin
-npx tsx src/cli.ts draft.md --json   # machine-readable
+npm run humanize -- draft.md         # score a file
+npm run humanize < draft.txt         # score stdin
+npm run humanize -- draft.md --json  # machine-readable
+```
+
+No-install alternative (Node ≥ 22.6, native TypeScript):
+
+```bash
+node --experimental-transform-types src/cli.ts draft.md
 ```
 
 ```
