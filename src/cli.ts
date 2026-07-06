@@ -68,7 +68,8 @@ async function main(): Promise<void> {
     const exemplars = loadExemplars(join(process.cwd(), 'exemplars'));
     for (const { label, body } of scored) {
       const j = await judgeText(body, key, exemplars);
-      console.log(`\njudge · ${label}: ${j.score}/10 human — ${j.would_a_human_type_this ? 'passes' : 'FAILS'} would-a-human-type-this`);
+      const capNote = j.ai_crutches.length >= 3 ? ` (capped by ${j.ai_crutches.length} structural crutches)` : '';
+      console.log(`\njudge · ${label}: ${j.score}/10 human${capNote} — ${j.would_a_human_type_this ? 'passes' : 'FAILS'} would-a-human-type-this`);
       console.log(`  ${j.verdict}`);
       console.log(`  authenticity ${j.authenticity}/10 — ${j.authenticity_notes}`);
       console.log(`  emotion & impact ${j.emotion_impact}/10 — ${j.emotion_impact_notes}`);

@@ -134,7 +134,7 @@ export function scoreText(raw: string): ToneMetrics {
   score += Math.min(copulaHits.length * 4, 8);
   score += Math.min(quipHits.length * 6, 18);         // quip-tic flavor
   score += Math.min(Math.max(0, inflationHits.length - 1) * 3, 9); // adverb inflation (first one free)
-  score += Math.min(negParallelHits.length * 6, 12);
+  score += Math.min(negParallelHits.length * 6, 24); // negate-then-reframe crutch — density penalized hard
   score += Math.min(fromToHits.length * 4, 8);
   score += Math.min(transitionsPer1k * 3, 10);
   if (sentences >= 4 && burstiness < 6) score += (6 - burstiness) * 2.5; // low burstiness penalty

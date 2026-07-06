@@ -33,7 +33,8 @@ Return STRICT JSON with these fields:
 
   "would_a_human_type_this": <true|false>
 }
-Max 5 worst_lines. Quote exactly. Be a harsh, specific grader — hedging helps no one.`;
+Max 5 worst_lines. Quote exactly. Be a harsh, specific grader — hedging helps no one.
+CRUCIAL: structural-crutch density caps human-likeness. If you list 3+ ai_crutches, "score" must be ≤ 6; 5+ crutches, ≤ 4. A distinctive voice built on repeated negate-then-reframe scaffolding ("X isn't Y, it's Z") is still formulaic. authenticity may stay high (the voice and specifics are real); the overall score reflects the scaffolding.`;
 
 export interface JudgeResult {
   score: number;
@@ -77,5 +78,13 @@ export async function judgeText(body: string, key: string, exemplars = ''): Prom
   );
   if (!res.ok) throw new Error(`gemini judge failed (${res.status}): ${await res.text()}`);
   const data = (await res.json()) as { candidates: { content: { parts: { text: string }[] } }[] };
-  return JSON.parse(data.candidates[0].content.parts[0].text) as JudgeResult;
+  return capForCrutches(JSON.parse(data.candidates[0].content.parts[0].text) as JudgeResult);
+}
+
+/** Enforce the crutch-density cap in code, so it holds even if the model doesn't. */
+export function capForCrutches(r: JudgeResult): JudgeResult {
+  const n = r.ai_crutches?.length ?? 0;
+  const cap = n >= 5 ? 4 : n >= 3 ? 6 : 10;
+  if (r.score <= cap) return r;
+  return { ...r, score: cap, would_a_human_type_this: cap <= 4 ? false : r.would_a_human_type_this };
 }
