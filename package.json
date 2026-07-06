@@ -1,0 +1,26 @@
+{
+  "name": "humanizer",
+  "version": "0.1.0",
+  "description": "Deterministic AI-ness scorer for prose, plus an optional LLM judge and a supervised detector. Score how much your writing reads like AI — and see exactly which tells give it away.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Chad Furman",
+  "keywords": ["ai-detection", "ai-text", "writing", "tone", "llm", "prose", "humanize"],
+  "bin": {
+    "humanizer": "src/cli.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "score": "tsx src/cli.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^3.2.0"
+  }
+}

@@ -1,0 +1,7 @@
+node_modules/
+detector/.venv/
+*.log
+.DS_Store
+# Never commit private calibration material — keep your exemplars local.
+exemplars/*
+!exemplars/README.md
