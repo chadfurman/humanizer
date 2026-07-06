@@ -68,9 +68,12 @@ async function main(): Promise<void> {
     const exemplars = loadExemplars(join(process.cwd(), 'exemplars'));
     for (const { label, body } of scored) {
       const j = await judgeText(body, key, exemplars);
-      console.log(`\njudge · ${label}: ${j.score}/10 — ${j.would_a_human_type_this ? 'passes' : 'FAILS'} would-a-human-type-this`);
+      console.log(`\njudge · ${label}: ${j.score}/10 human — ${j.would_a_human_type_this ? 'passes' : 'FAILS'} would-a-human-type-this`);
       console.log(`  ${j.verdict}`);
-      for (const w of j.worst_lines) console.log(`  ✗ "${w.quote}" — ${w.why}`);
+      console.log(`  authenticity ${j.authenticity}/10 — ${j.authenticity_notes}`);
+      console.log(`  emotion & impact ${j.emotion_impact}/10 — ${j.emotion_impact_notes}`);
+      if (j.ai_crutches.length) console.log(`  ai crutches: ${j.ai_crutches.map((c) => `"${c}"`).join('; ')}`);
+      for (const w of j.worst_lines) console.log(`  ✗ "${w.quote}" — ${w.why}\n     → ${w.rewrite}`);
     }
   }
 }

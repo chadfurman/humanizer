@@ -26,6 +26,12 @@ describe('scoreText', () => {
     expect(scoreText(AI_SLOP).aiScore).toBeGreaterThan(scoreText(HUMAN).aiScore + 30);
   });
 
+  it('catches the "X isn\'t Y, it\'s Z" reframe crutch', () => {
+    const m = scoreText("that isn't a process, it's a LARP. and this isn't hard, it's tedious.");
+    expect(m.negParallel).toBeGreaterThanOrEqual(2);
+    expect(m.hits.negParallel.length).toBeGreaterThanOrEqual(2);
+  });
+
   it('counts em-dash density per 1k words', () => {
     expect(scoreText('a — b — c — d').emDashPer1k).toBeGreaterThan(0);
     expect(scoreText('plain prose with no dashes at all here').emDashPer1k).toBe(0);

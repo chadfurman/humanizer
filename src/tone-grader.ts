@@ -98,6 +98,8 @@ export function scoreText(raw: string): ToneMetrics {
   const negParallelHits = [
     ...regexHits(text, /it'?s not (just |only )?[^,.]+,? (but|it'?s) /gi),
     ...regexHits(text, /\bnot (just|only) [^,.]+,? but\b/gi),
+    // the "X isn't Y, it's Z" family — the same negate-then-reframe crutch
+    ...regexHits(text, /\b\w+ (isn'?t|aren'?t|wasn'?t|weren'?t|doesn'?t|didn'?t|won'?t) [^,.]{2,40},? (it'?s|they'?re|that'?s|it|they) /gi),
   ];
   const fromToHits = regexHits(text, /\bfrom [^,.]{3,40} to [^,.]{3,40}/gi);
   const transitionHits = countMatches(text, TRANSITIONS.map((w) => w + ',')).concat(

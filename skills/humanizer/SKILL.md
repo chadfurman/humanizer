@@ -35,10 +35,37 @@ draft.md  aiScore 61/100
 
 After scoring, offer to rewrite the flagged lines: vary sentence length, cut the AI vocab and tricolons, drop hollow hedges, add real specifics. Re-score to confirm the number dropped.
 
-## Optional deeper layers
+## Go past "is it AI" — measure what makes writing human
 
-- **`--judge`** adds a Gemini rubric read (rhythm, voice, effort asymmetry) with quoted worst lines and rewrites. Needs `GEMINI_API_KEY` in the environment; skip it if unset. Calibrate to a voice by putting human-written samples in the plugin's `exemplars/` dir.
-- **`detector/`** is a supervised DeBERTa second opinion (Python; see `detector/DETECTORS.md`).
+The static grader only counts AI *tells*. Add **`--judge`** (Gemini; needs `GEMINI_API_KEY`, skip if unset) to score the POSITIVE human qualities the counter can't see. It returns, each 0–10 with quoted evidence:
+
+- **authenticity** — lived experience (named places, sensory detail, real memories, a real identity behind the words), creative messiness (tangents, asides, unresolved threads vs tidy formula), critical thinking (a real/contrarian take vs view-from-nowhere), and whether it trusts the reader instead of over-explaining.
+- **emotion & impact** — does it actually make you feel anything or leave an impression? Stakes, vulnerability, a line that lands — vs competent-but-dead prose and motivational-poster endings.
+- **ai_crutches** — the specific structural tics quoted back ("It's not X, it's Y", em-dash chains, rule-of-three, tidy-moral endings).
+
+Always report BOTH: the static aiScore (the tells) *and* the judge's authenticity + emotion/impact (the substance). A draft can score low-AI yet still be hollow — flag that.
+
+```bash
+node --experimental-transform-types "$CLAUDE_PLUGIN_ROOT/src/cli.ts" draft.md --judge
+```
+
+Calibrate the judge to a specific voice by putting human-written samples in the plugin's `exemplars/` dir.
+
+## Coach toward human, don't just grade
+
+After scoring, help the writer close the gap — concretely, tied to what they're working on:
+
+- Replace generalities with **lived specifics**: a real place, a real number, a sensory detail, something that actually happened.
+- Let it be **messy**: keep a tangent, an aside, an unresolved thought. Vary sentence length hard.
+- State a **real opinion with stakes** — cut the balanced view-from-nowhere.
+- **Trust the reader**: delete the "It's not X, it's Y" crutches, the tidy moral, the signposting.
+- Re-score to confirm authenticity and emotion went UP, not just that aiScore went down.
+
+If they want to retrain their own voice rather than patch a draft, ask what they're writing (fiction / essay / blog / academic) and whether they want AI-free drafting habits — pen and paper, offline editors (Scrivener, Obsidian, FocusWriter), editing against a print style guide — then tailor from there.
+
+## Supervised detector
+
+`detector/` is a supervised DeBERTa second opinion (Python; see `detector/DETECTORS.md`).
 
 ## One caveat, always honor it
 

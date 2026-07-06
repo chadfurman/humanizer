@@ -1,7 +1,7 @@
 {
   "name": "humanizer",
   "description": "Score how much writing reads like AI and help rewrite the tells out. A deterministic prose scorer with an optional LLM judge and supervised detector, exposed as a skill Claude can run against files.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "Chad Furman",
     "url": "https://github.com/chadfurman"

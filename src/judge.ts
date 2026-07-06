@@ -1,26 +1,48 @@
 // LLM-as-judge (Gemini, temp 0, rubric-based). The deterministic grader counts
-// tells; this catches what counting can't — rhythm sameness, hollow enthusiasm,
-// quip-flavor, sentences no tired human would type. Optionally calibrate it with
-// your OWN human-written excerpts (see loadExemplars) — style, not content.
+// tells; this judges what counting can't — and, beyond just "does it read AI,"
+// scores the POSITIVE human qualities: authentic lived experience, creative
+// messiness, critical thinking, and whether the writing carries any emotion or
+// impact at all. Optionally calibrate with your OWN human-written excerpts.
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const RUBRIC = `You are judging whether a piece of writing reads like a human wrote it.
-Score 0-10 where 10 = indistinguishable from a busy person's own writing and 0 = obviously AI.
-Judge these axes, each with specific quoted evidence:
-1. RHYTHM — do sentences vary in length and shape, or march in uniform cadence?
-2. TICS — formal-AI tells (delve/robust/seamless, "not just X but Y", em-dash chains, rule-of-three), punchy-AI tells (internet quips: "receipts", "chef's kiss", "no notes", "plot twist", forced wryness), view-from-nowhere voice (claims with no owner), adverb inflation (fundamentally/essentially/ultimately), and fake hedging that concedes nothing.
-3. SPECIFICITY — real numbers, real detail vs plausible-sounding generalities.
-4. VOICE — flat opinions stated plainly; no hollow enthusiasm; no summarizing itself; endings that just stop rather than swelling into a moral.
-5. EFFORT ASYMMETRY — humans over-explain what confused them and skip what bored them; AI allocates evenly (watch for symmetric section lengths and a tidy moral at the end).
+const RUBRIC = `You are judging a piece of writing on how HUMAN it reads and how much it lands.
+Humans write from lived experience with creative imperfection, real critical thinking, and the
+natural messiness of actual thought. AI writing is predictable, structurally neat, evenly
+weighted, and emotionally hollow. Judge with specific quoted evidence on every axis.
 
-Return STRICT JSON: {"score": n, "verdict": "...", "worst_lines": [{"quote": "...", "why": "...", "rewrite": "..."}], "would_a_human_type_this": true/false}
-Max 5 worst_lines. Quote exactly.`;
+Return STRICT JSON with these fields:
+{
+  "score": <0-10 overall: 10 = indistinguishable from a real person's own writing, 0 = obviously AI>,
+  "verdict": "<one or two sentences, plain>",
+
+  "authenticity": <0-10>,
+  "authenticity_notes": "<what earns or loses it — judge ALL of:
+     - LIVED EXPERIENCE: named places, sensory detail, real memories, a specific identity behind the words (vs plausible generalities from nowhere)
+     - CREATIVE MESSINESS: tangents, asides, subplots, unresolved threads, imperfection (vs tidy, formulaic, symmetric structure)
+     - CRITICAL THINKING: a real argument or contrarian, nuanced take the writer actually holds (vs safe, balanced, view-from-nowhere summary)
+     - TRUSTS THE READER: makes its point without over-explaining or leaning on AI structural crutches (vs hand-holding and tidy morals)>",
+
+  "emotion_impact": <0-10>,
+  "emotion_impact_notes": "<does it make you FEEL anything or leave an impression? Reward stakes, vulnerability, a distinct voice, a line that lands and stays. Penalize hollow enthusiasm, flat corporate affect, motivational-poster endings, and prose that is competent but dead. Quote the line that lands (or note that none does).>",
+
+  "ai_crutches": ["<quote each structural AI crutch found, e.g. an \"It's not X, it's Y\" line, an em-dash chain, a rule-of-three, a tidy-moral ending, a 'in conclusion' signpost. Empty array if genuinely none.>"],
+
+  "worst_lines": [{"quote": "<exact>", "why": "<why it reads AI or falls flat>", "rewrite": "<a more human version>"}],
+
+  "would_a_human_type_this": <true|false>
+}
+Max 5 worst_lines. Quote exactly. Be a harsh, specific grader — hedging helps no one.`;
 
 export interface JudgeResult {
   score: number;
   verdict: string;
+  authenticity: number;
+  authenticity_notes: string;
+  emotion_impact: number;
+  emotion_impact_notes: string;
+  ai_crutches: string[];
   worst_lines: { quote: string; why: string; rewrite: string }[];
   would_a_human_type_this: boolean;
 }
@@ -38,7 +60,7 @@ export function loadExemplars(dir: string): string {
     .map((f) => stripFrontmatter(readFileSync(join(dir, f), 'utf8')).slice(0, 900))
     .filter(Boolean);
   if (!bits.length) return '';
-  return `\n\nHuman-written excerpts for calibration (match the STYLE, not the content):\n---\n${bits.join('\n---\n')}`;
+  return `\n\nHuman-written excerpts for calibration (match the STYLE and texture, not the content):\n---\n${bits.join('\n---\n')}`;
 }
 
 export async function judgeText(body: string, key: string, exemplars = ''): Promise<JudgeResult> {

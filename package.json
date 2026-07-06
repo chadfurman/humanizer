@@ -1,6 +1,6 @@
 {
   "name": "humanizer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Deterministic AI-ness scorer for prose, plus an optional LLM judge and a supervised detector. Score how much your writing reads like AI — and see exactly which tells give it away.",
   "type": "module",
   "license": "MIT",
