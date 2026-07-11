@@ -21,6 +21,7 @@ export interface ToneMetrics {
   burstiness: number; // stdev of sentence word-counts; LOW is AI-like
   contractionsPer100: number; // corpus baseline ~1.2-4.9; AI-formal prose goes low
   startDiversity: number; // unique sentence-openers / sentences; corpus ~0.56-0.75
+  banned: number; // permabanned-phrase hits — any >0 is a hard fail
   aiScore: number; // 0-100, higher = more AI
   hits: Record<string, string[]>;
 }
@@ -45,6 +46,11 @@ const AI_VOCAB = [
   'utilize', 'utilizing', 'commence', 'plethora', 'myriad', 'boasts',
 ];
 const COPULA_AVOID = ['serves as', 'stands as', 'acts as a', 'boasts a', 'boasts an'];
+// Permabanned phrases: hollow AI tics that must never ship. A single hit forces a
+// hard fail (score >> the aiScore<15 gate), unlike the weighted tells above.
+const BANNED = [
+  "that's the whole point", 'that is the whole point', 'which is the whole point',
+];
 // The OTHER AI failure mode: try-hard internet-quip flavor. Formal-AI tells
 // above; these are punchy-AI tells (2024-26 vintage).
 const QUIPS = [
@@ -93,6 +99,7 @@ export function scoreText(raw: string): ToneMetrics {
   const signpostHits = countMatches(text, SIGNPOSTS);
   const aiVocabHits = countMatches(text, AI_VOCAB.map((w) => ' ' + w)).map((s) => s.trim());
   const copulaHits = countMatches(text, COPULA_AVOID);
+  const bannedHits = countMatches(text, BANNED);
   const quipHits = [...countMatches(text, QUIPS), ...regexHits(text, QUIP_TOKENS)];
   const inflationHits = countMatches(text, INFLATION.map((w) => ' ' + w)).map((w) => w.trim());
   const negParallelHits = [
@@ -141,6 +148,7 @@ export function scoreText(raw: string): ToneMetrics {
   // Texture deltas vs the human corpus (only on texts big enough to trust).
   if (words >= 120 && contractionsPer100 < 0.8) score += (0.8 - contractionsPer100) * 8; // stiff, uncontracted prose
   if (starts.length >= 8 && startDiversity < 0.45) score += (0.45 - startDiversity) * 30; // The... The... It... It...
+  score += bannedHits.length * 100; // permabanned phrases: any hit is a hard fail
 
   return {
     words, sentences,
@@ -158,12 +166,13 @@ export function scoreText(raw: string): ToneMetrics {
     burstiness: +burstiness.toFixed(2),
     contractionsPer100: +contractionsPer100.toFixed(2),
     startDiversity: +startDiversity.toFixed(2),
+    banned: bannedHits.length,
     aiScore: Math.round(Math.min(score, 100)),
     hits: {
       emDash: emDashes ? [`${emDashes}×`] : [],
       tricolon: tricolonHits, hedges: hedgeHits, signposts: signpostHits,
       aiVocab: aiVocabHits, copulaAvoid: copulaHits, quips: quipHits, inflation: inflationHits, negParallel: negParallelHits,
-      fromXtoY: fromToHits,
+      fromXtoY: fromToHits, banned: bannedHits,
     },
   };
 }
